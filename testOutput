@@ -1,0 +1,14 @@
+Input: "0"
+Float: 0.000000
+Hex: 0x00000000
+Info: +0.00000000000000000000000 2^-127
+Half Hex: 0x0000
+Half info: 
+
+Input: "0.00001"
+Float: 0.000010
+Hex: 0x3727c5ac
+Info: +1.01001111100010110101100 2^-17
+Half Hex: 0x0000
+Half info: 
+
