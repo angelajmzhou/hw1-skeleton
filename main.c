@@ -2,6 +2,7 @@
 #include "floating.h"
 #include <stdlib.h>
 
+
 int main(int argc, char **argv){
   int i;
   union floating f;
@@ -11,6 +12,24 @@ int main(int argc, char **argv){
     printf("Error:  Can only run on a system where sizeof(float) == 32");
     return -1;
   }
+  //NaN
+  printf("Input: \"%s\"\n", "0x7F800001");
+    f.as_int = 0x7F800001;
+    printf("Info: %s\n", floating_info(f, buffer, 256));
+  //INF
+  printf("Input: \"%s\"\n", "0x7F800000");
+    f.as_int = 0x7F800000;
+    printf("Info: %s\n", floating_info(f, buffer, 256));
+    //denorm
+  printf("Input: \"%s\"\n", "0x00000001");
+    f.as_int = 0x00000001;
+    printf("Info: %s\n", floating_info(f, buffer, 256));
+    u_int16_t fl;
+    //half
+     printf("Input: \"%s\"\n", "1000");
+    fl = 10000;
+    printf("Info: %s\n", ieee_16_info(fl , buffer, 256));
+
   for(i = 1; i < argc; ++i){
     printf("Input: \"%s\"\n", argv[i]);
     f.as_float = strtof(argv[i], NULL);
@@ -25,3 +44,4 @@ int main(int argc, char **argv){
 
   return 0;
 }
+

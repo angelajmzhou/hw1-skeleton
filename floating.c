@@ -34,97 +34,93 @@
 char *floating_info(union floating f, char *buf, size_t buflen){
   //using float, uint interchangably
  //fprintf(stderr, "Need to implement\n");
- char *exp = malloc(sizeof(char)*4);
- char *mantissa = malloc(sizeof(char)*24);
- int i=31;
- int pow = 7;
- long int bin = 0x80000000; //comparison to extract ints, mask w/ 0's
+ char mantissa[24];
+ char sign;
+ char integer;
+
  //shift when we need to extract more than one bit
  //two's complement, iEEE -- 1000000 is negative...
  //so if 0, it's pos
  //uint32_t is reintepretation of memory address
- if (((bin&f.as_int)>>i)==1){
-  buf[0] = '-';
- } else{
-  buf[0] = '+';
- }
- i=i-9; bin = bin>>9;
- fprintf(stderr, "i is: %d ", i);
+ if (buflen==0){return buf;}
+ if (((0x80000000&f.as_int)>>31)==1){sign = '-';}
+ else{sign = '+';}
 
  //first 10 characters of mantissa, including sign, null terminated
  //idea of this code: read bits in left to right, assigning them to the appropriate values.
-int32_t exponent = (int32_t)((f.as_int&(0x7F800000))>>23);
- exponent -= 127;
- sprintf(exp,"%d",exponent);
- //printf("exponent: %d ", exponent);
-  buf[1] = '1';
-  int ch = 3;
-while(i>=0){
-  mantissa[22-i] = ((f.as_int&bin)>>i)+'0'; 
-  i--;
-}
-mantissa[23]='\0';
-
-i=22;
-int index;
-if (exponent == 128 && strcmp(mantissa,"00000000000000000000000")){
-  char *form = "INF";
-  for (index=1; index<buflen-2 ;index++){
-      buf[index] = form[index-1];
-  }
-  buf[index] = '\0';
+int exponent = ((f.as_int & 0x7F800000) >> 23) - 127;
+if (exponent == 128 && !(f.as_int&0x007FFFFF)){
+  snprintf(buf, buflen, "%c%s", sign,"INF"); 
   return buf;
-} else if(exponent == 128 && !strcmp(mantissa,"00000000000000000000000")){
-  fprintf(stderr, "entered\n");
-  char *form = "NaN";
-  for (index=0; index<buflen-2 ;index++){
-      buf[index] = form[index-1];
-  }
-  buf[index] = '\0';
+} else if(exponent == 128 && (f.as_int&0x007FFFFF)){
+    snprintf(buf, buflen, "%s", "NaN");
   return buf;
-}else if(exponent == -127 && strcmp(mantissa,"00000000000000000000000")){
-  char *form = "0";
-  for (index=0; index<buflen-2 ;index++){
-      buf[index] = form[index-1];
-  }
-  buf[index] = '\0';
+}else if(exponent == -127 && !(f.as_int&0x007FFFFF)){
+  snprintf(buf, buflen, "%c%s", sign,"0"); 
   return buf;
 } 
 if (exponent == -127){//denormalization handling here
-  buf[1] = '0';
+  integer = '0';
   }
   else{
-  buf[1] = '1';
+  integer = '1';
   } 
-
-  buf[2]='.';
-while(i>=0 && ch < buflen-2){
-  buf[ch] = ((f.as_int&bin)>>i)+'0'; 
-  i--; ch++;  bin=bin>>1;
+int bin = 0x400000;
+int i;
+for (i=0; i<23; i++){
+  mantissa[i] = ((f.as_int&bin)>>(22-i))+'0'; 
+  bin=bin>>1;
 }
-
-char *format = " 2^";
-i=0;
-while (ch<buflen-2 && i<3){
-  buf[ch] = format[i];
-  i++;
-  ch++;
-}
-
-for (i=0;i<(strlen(exp)+1)&&(ch)<buflen-2; i++){
-  buf[ch] = exp[i];
-  ch++;
-}
-buf[buflen-1]='\0';
+mantissa[23] = '\0';
+snprintf(buf,buflen, "%c%c.%s 2^%d",sign,integer, mantissa, exponent);
 return buf;
 }
 
 /* This function is designed to provide information about
    the 16b IEEE floating point value passed in with the same exact format.  */
 char *ieee_16_info(uint16_t f, char *buf, size_t buflen){
-  fprintf(stderr, "Need to implement\n");
-  if(buflen >= 1) buf[0] = '\0';
+ char mantissa[11];
+ char sign;
+ char integer;
+
+ //shift when we need to extract more than one bit
+ //two's complement, iEEE -- 1000000 is negative...
+ //so if 0, it's pos
+ //uint32_t is reintepretation of memory address
+ if (buflen==0){return buf;}
+ if (((0x8000&f)>>15)==1){sign = '-';}
+ else{sign = '+';}
+
+ //first 10 characters of mantissa, including sign, null terminated
+ //idea of this code: read bits in left to right, assigning them to the appropriate values.
+int exponent = ((f & 0x7C00) >> 10)-15;
+fprintf(stderr, "exp: %d\n", exponent);
+int index;
+if (exponent == 16 && !(f&0x3FF)){
+  snprintf(buf, buflen, "%cINF", sign); 
   return buf;
+} else if(exponent == 16 && (f&0x3FF)){
+    snprintf(buf, buflen, "%s", "NaN");
+  return buf;
+}else if(exponent == -15 && !(f&0x3FF)){
+  snprintf(buf, buflen, "%c0", sign); 
+  return buf;
+} 
+if (exponent == -15){//denormalization handling here
+  integer = '0';
+  }
+  else{
+  integer = '1';
+  } 
+int bin = 0x200;
+int i;
+for (i=0; i<10; i++){
+  mantissa[i] = ((f&bin)>>(9-i))+'0'; 
+  bin=bin>>1;
+}
+mantissa[10] = '\0';
+snprintf(buf,buflen, "%c%c.%s 2^%d",sign,integer, mantissa, exponent);
+return buf;
 }
 
 
@@ -144,6 +140,5 @@ uint16_t as_ieee_16(union floating f){
   fprintf(stderr, "Need to implement\n");
   return 0;
 }
-
 
 

@@ -14,7 +14,7 @@ clean :
 
 test : clean floating
 	touch testOutput
-	./floating 0 0.00001 >  testOutput
+	./floating  0.5 20000 >  testOutput
 	@echo The following should be empty if there are no problems
 	diff sampleOutput testOutput 2> /dev/null
 	@echo Testing complete
