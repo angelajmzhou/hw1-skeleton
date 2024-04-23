@@ -28,7 +28,7 @@ int main(int argc, char **argv){
     //half
      printf("Input: \"%s\"\n", "1000");
     fl = 10000;
-    printf("Info: %s\n", ieee_16_info(fl , buffer, 256));
+ //   printf("Info: %s\n", ieee_16_info(fl , buffer, 256));
 
   for(i = 1; i < argc; ++i){
     printf("Input: \"%s\"\n", argv[i]);
@@ -36,7 +36,7 @@ int main(int argc, char **argv){
     printf("Float: %f\n", f.as_float);
     printf("Hex: 0x%08x\n", f.as_int);
     printf("Info: %s\n", floating_info(f, buffer, 256));
-    half = as_ieee_16(f);
+   half = as_ieee_16(f);
     printf("Half Hex: 0x%04x\n", half);
     printf("Half info: %s\n", ieee_16_info(half, buffer, 256));
     printf("\n");

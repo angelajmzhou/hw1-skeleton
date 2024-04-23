@@ -8,6 +8,7 @@ union floating {
   float as_float;
 };
 
+
 /* This function is designed to provide information about
    the IEEE floating point value passed in.  Note that this
    ONLY works on systems where sizeof(float) == 4 */
@@ -18,7 +19,7 @@ char *floating_info(union floating f, char *buf, size_t buflen);
    https://en.wikipedia.org/wiki/Half-precision_floating-point_format
 */
 
-char *ieee_16_info(uint16_t f, char *buf, size_t buflen);
+char *ieee_16_info(u_int16_t f, char *buf, size_t buflen);
 
 
 
