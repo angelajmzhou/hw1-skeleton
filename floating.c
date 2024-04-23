@@ -142,10 +142,10 @@ char *ieee_16_info(uint16_t f, char *buf, size_t buflen){
    d) +/- 0, NaNs, +/- infinity.
  */
 uint16_t as_ieee_16(union floating f){
-  u_int32_t sign = (0x80000000 & f.as_int)>>31;
+  u_int32_t sign = (0x8000000 & f.as_int)>>31;
   int exponent = ((f.as_int & 0x7F800000) >> 23) - 127;
   fprintf(stderr, "16b ieee exponent value: %d\n", exponent);
-  u_int16_t mantissa = (f.as_int&0x007FFFFF);
+  u_int32_t mantissa = (f.as_int&0x007FFFFF);
   u_int8_t eleven = (f.as_int&0x1000)>>12;
   u_int8_t lsb = (f.as_int&0x2000)>>13;
 
@@ -168,11 +168,14 @@ uint16_t as_ieee_16(union floating f){
   else if (exponent == -15){
    mantissa = mantissa >> 13; 
    if(eleven&&lsb){mantissa += 1;}
-   if(mantissa & 0x400){
+   if(mantissa & 0x400){//checks for overflow
     exponent += 1;
     mantissa = mantissa >> 1;
    }
+   if(mantissa & 0x3FF){//check if there are any numbers in the first 10 digits of mantissa
     return ((sign<<15) + (exponent<<10) +mantissa);
+   }
+  return sign<<15;//return 0 if the sign is too small
   }
   //now for rounding, the fun part...
   if(eleven&&lsb){
