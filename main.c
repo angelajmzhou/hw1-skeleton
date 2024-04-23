@@ -24,10 +24,6 @@ int main(int argc, char **argv){
   printf("Input: \"%s\"\n", "0x00000001");
     f.as_int = 0x00000001;
     printf("Info: %s\n", floating_info(f, buffer, 256));
-    u_int16_t fl;
-    //half
-     printf("Input: \"%s\"\n", "1000");
-    fl = 10000;
  //   printf("Info: %s\n", ieee_16_info(fl , buffer, 256));
 
   for(i = 1; i < argc; ++i){

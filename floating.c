@@ -92,17 +92,16 @@ char *ieee_16_info(uint16_t f, char *buf, size_t buflen){
   //uint32_t is reintepretation of memory address
   
   if (buflen==0){return buf;}
-  fprintf(stderr, "16b input: %0x\n", (f));
-  if (((0xFFFF&f) >> 14)){sign = '-';}
+  //fprintf(stderr, "16b input: %0x\n", (f));
+  if ((f >> 15)&1){sign = '-';}
   else{sign = '+';}
-  fprintf(stderr,"-------------------ieee_16_info call--------------\n");
-  fprintf(stderr,"sign is %c\n", sign);
+  printf("-------------------ieee_16_info call--------------\n");
+  printf("sign is %c\n", sign);
 
   //first 10 characters of mantissa, including sign, null terminated
   //idea of this code: read bits in left to right, assigning them to the appropriate values.
   int exponent = ((0x7C00 & f) >> 10) -15 ;
-  fprintf(stderr, "exp: %d\n", exponent);
-  int index;
+  //fprintf(stderr, "exp: %d\n", exponent);
   if (exponent == 16 && !(f &0x3FF)){
     snprintf(buf, buflen, "%cINF", sign); 
     return buf;
@@ -143,8 +142,9 @@ char *ieee_16_info(uint16_t f, char *buf, size_t buflen){
    d) +/- 0, NaNs, +/- infinity.
  */
 uint16_t as_ieee_16(union floating f){
-  u_int16_t sign = (0x8000000 & f.as_int)>>31;
-  int exponent = (0x7F80000 & f.as_int)>>23 - 127;
+  u_int32_t sign = (0x80000000 & f.as_int)>>31;
+  int exponent = ((f.as_int & 0x7F800000) >> 23) - 127;
+  fprintf(stderr, "16b ieee exponent value: %d\n", exponent);
   u_int16_t mantissa = (f.as_int&0x007FFFFF);
   u_int8_t eleven = (f.as_int&0x1000)>>12;
   u_int8_t lsb = (f.as_int&0x2000)>>13;
@@ -153,25 +153,26 @@ uint16_t as_ieee_16(union floating f){
   //deal with 0/denormalized/underflow numbers coming in. will be zero anyways due to reduced range. 
   //sees if exponent is all zero's. 
   if(exponent<-24){
-  return sign<<15;
+    return sign<<15;
+    
   }
   //deal with NaN coming in.  (all 1's in exponent, nonzero in mantissa)
   else if((exponent == 128)&&(mantissa)){
-  return sign<<15 +0x7C00<<10 + mantissa>>13;
+  return (sign<<15) +(0x7C00<<10) + (mantissa>>13);
   }
   //deal with INF coming in (all 1's in exponent, all 0's in mantissa, ie 127 after debiasing) as well as overflow (anything > 15)
   else if(exponent>15){
-  return sign<<15 + 0x7C00<<10;
+  return (sign<<15) + (0x7C00<<10);
   }
   //denormalization handling
-  else if (exponent = -15){
+  else if (exponent == -15){
    mantissa = mantissa >> 13; 
    if(eleven&&lsb){mantissa += 1;}
    if(mantissa & 0x400){
     exponent += 1;
     mantissa = mantissa >> 1;
    }
-    return (sign<<15 + exponent<<10 +mantissa);
+    return ((sign<<15) + (exponent<<10) +mantissa);
   }
   //now for rounding, the fun part...
   if(eleven&&lsb){
@@ -180,11 +181,13 @@ uint16_t as_ieee_16(union floating f){
     //handle overflow (return inf)
    if(mantissa & 0x400){
     exponent += 1;
-    if(exponent>15){return (sign<<15 + 0x7C00<<10);} //return inf if overflow
+    if(exponent>15){return ((sign<<15) + (0x7C00<<10));} //return inf if overflow
     mantissa = mantissa >> 1;
    } 
   }
-  return (sign<<15 + exponent<<10 +mantissa); 
+    fprintf(stderr, "16b ieee exponent value: %d\n", exponent);
+
+  return (sign<<15) + (exponent<<10) +mantissa; 
 }
 
 
