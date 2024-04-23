@@ -83,14 +83,7 @@ return buf;
 char *ieee_16_info(uint16_t f, char *buf, size_t buflen){
   char mantissa[11];
   char sign;
-  char integer;
-  //problem: reading everything in as 0.
-
-  //shift when we need to extract more than one bit
-  //two's complement, iEEE -- 1000000 is negative...
-  //so if 0, it's pos
-  //uint32_t is reintepretation of memory address
-  
+  char integer;  
   if (buflen==0){return buf;}
   //fprintf(stderr, "16b input: %0x\n", (f));
   if ((f >> 15)&1){sign = '-';}
@@ -142,55 +135,55 @@ char *ieee_16_info(uint16_t f, char *buf, size_t buflen){
    d) +/- 0, NaNs, +/- infinity.
  */
 uint16_t as_ieee_16(union floating f){
-  u_int32_t sign = (0x8000000 & f.as_int)>>31;
+  u_int32_t sign = (0x80000000 & f.as_int)>>31;
   int exponent = ((f.as_int & 0x7F800000) >> 23) - 127;
   fprintf(stderr, "16b ieee exponent value: %d\n", exponent);
   u_int32_t mantissa = (f.as_int&0x007FFFFF);
-  u_int8_t eleven = (f.as_int&0x1000)>>12;
-  u_int8_t lsb = (f.as_int&0x2000)>>13;
+  fprintf(stderr, "16b ieee mantissa: %x\n", mantissa);
 
 
   //deal with 0/denormalized/underflow numbers coming in. will be zero anyways due to reduced range. 
-  //sees if exponent is all zero's. 
-  if(exponent<-24){
-    return sign<<15;
-    
-  }
+    if(exponent < -24){
+        return sign << 15; // only need the sign bit, the rest are zeros
+    }
   //deal with NaN coming in.  (all 1's in exponent, nonzero in mantissa)
-  else if((exponent == 128)&&(mantissa)){
-  return (sign<<15) +(0x7C00<<10) + (mantissa>>13);
-  }
+    else if((exponent == 128) && mantissa){
+        return (sign << 15) + 0x7FFF ; //signal NaN
+    }
   //deal with INF coming in (all 1's in exponent, all 0's in mantissa, ie 127 after debiasing) as well as overflow (anything > 15)
-  else if(exponent>15){
-  return (sign<<15) + (0x7C00<<10);
-  }
+    else if(exponent > 15){
+        return (sign << 15) + 0x7C00; // set exponent bits to all ones, mantissa to zero (infinity)
+    }
   //denormalization handling
-  else if (exponent == -15){
-   mantissa = mantissa >> 13; 
-   if(eleven&&lsb){mantissa += 1;}
-   if(mantissa & 0x400){//checks for overflow
-    exponent += 1;
-    mantissa = mantissa >> 1;
-   }
-   if(mantissa & 0x3FF){//check if there are any numbers in the first 10 digits of mantissa
-    return ((sign<<15) + (exponent<<10) +mantissa);
-   }
-  return sign<<15;//return 0 if the sign is too small
-  }
-  //now for rounding, the fun part...
-  if(eleven&&lsb){
-    //handle rounding up
-    mantissa += 1;
-    //handle overflow (return inf)
-   if(mantissa & 0x400){
-    exponent += 1;
-    if(exponent>15){return ((sign<<15) + (0x7C00<<10));} //return inf if overflow
-    mantissa = mantissa >> 1;
-   } 
-  }
-    fprintf(stderr, "16b ieee exponent value: %d\n", exponent);
+    else {
+        if (exponent >= -14) {
+            //biases exponent 
+            exponent += 15;
+        } else {
+          //denormalized!!! watch out, this is still unbiased. i.e. -15 to 16 range. 
+            int shift = -(exponent+14);
+            //-14 is smallest reprsentable number. find difference btwn it and the the current exponent to determine bitshift. 
+            // for example: 00111 * 2^-17 --> 17-14 = >>3 --> 000001 2^-14 
+            mantissa = mantissa >>(shift); // shift mantissa to account for the exponent being STRICTLY -14. 
+            exponent = 0;//exponent is 0 for denorm numbers. 
+        }
+        u_int8_t round_bit = (f.as_int>>12)&1;
+        mantissa >>= 13; // bitshift mantissa to 10b form. 
+        // round
+        if (round_bit && (mantissa & 1)) {//check if mantissa's last value is 1 and if the rounding bit is one. 
+            mantissa += 1; //if so, round
+            if (mantissa & 0x400) { // overflow check
+                mantissa = 0; //overflow means the number was gonna be all 0 anyways (like 111+1) so just reset to fit it. 
+                exponent += 1; // increment exponent
+                if (exponent > 30) { //is exponent out of bounds?
+                    return (sign << 15) | 0x7C00; // return infinity
+                }
+            }
+        }
 
-  return (sign<<15) + (exponent<<10) +mantissa; 
+        // Combine sign, exponent, and mantissa into the final 16-bit half-precision float
+        return (sign << 15) | (exponent << 10) | (mantissa & 0x3FF);
+    }
 }
 
 

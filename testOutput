@@ -1,51 +1,54 @@
-Input: "0x7F800001"
-Info: NaN
-Input: "0x7F800000"
-Info: +INF
-Input: "0x00000001"
-Info: +0.00000000000000000000001 2^-127
-Input: "0.5"
-Float: 0.500000
-Hex: 0x3f000000
-Info: +1.00000000000000000000000 2^-1
-Half Hex: 0xfc00
--------------------ieee_16_info call--------------
-sign is -
-Half info: -INF
-
-Input: "1000000"
-Float: 1000000.000000
-Hex: 0x49742400
-Info: +1.11101000010010000000000 2^19
-Half Hex: 0x0000
+Input: "0x33800000"
+Float: 864026624.000000
+Hex: 0x4e4e0000
+Info: +1.10011100000000000000000 2^29
+Half Hex: 0x7c00
 -------------------ieee_16_info call--------------
 sign is +
-Half info: +0
+Half info: +INF
 
-Input: "-134"
-Float: -134.000000
-Hex: 0xc3060000
-Info: -1.00001100000000000000000 2^7
-Half Hex: 0x9c00
--------------------ieee_16_info call--------------
-sign is -
-Half info: -1.0000000000 2^-8
-
-Input: "-23134"
-Float: -23134.000000
-Hex: 0xc6b4bc00
-Info: -1.01101001011110000000000 2^14
-Half Hex: 0x1a00
+Input: "0x33bfffff"
+Float: 868220928.000000
+Hex: 0x4e4f0000
+Info: +1.10011110000000000000000 2^29
+Half Hex: 0x7c00
 -------------------ieee_16_info call--------------
 sign is +
-Half info: +1.1000000000 2^-9
+Half info: +INF
 
-Input: "0.00001"
-Float: 0.000010
-Hex: 0x3727c5ac
-Info: +1.01001111100010110101100 2^-17
-Half Hex: 0x81ac
+Input: "0x33c00000"
+Float: 868220928.000000
+Hex: 0x4e4f0000
+Info: +1.10011110000000000000000 2^29
+Half Hex: 0x7c00
 -------------------ieee_16_info call--------------
-sign is -
-Half info: -0.0110101100 2^-15
+sign is +
+Half info: +INF
+
+Input: "0x387fe000"
+Float: 947904512.000000
+Hex: 0x4e61ff80
+Info: +1.11000011111111110000000 2^29
+Half Hex: 0x7c00
+-------------------ieee_16_info call--------------
+sign is +
+Half info: +INF
+
+Input: "0x387ff000"
+Float: 947908608.000000
+Hex: 0x4e61ffc0
+Info: +1.11000011111111111000000 2^29
+Half Hex: 0x7c00
+-------------------ieee_16_info call--------------
+sign is +
+Half info: +INF
+
+Input: "0x477fd001"
+Float: 1199558656.000000
+Hex: 0x4e8effa0
+Info: +1.00011101111111110100000 2^30
+Half Hex: 0x7c00
+-------------------ieee_16_info call--------------
+sign is +
+Half info: +INF
 
