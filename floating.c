@@ -147,11 +147,12 @@ uint16_t as_ieee_16(union floating f){
         return sign << 15; // only need the sign bit, the rest are zeros
     }
   //deal with NaN coming in.  (all 1's in exponent, nonzero in mantissa)
-    else if((exponent == 128) && mantissa){
+    else if((exponent == 128) && (mantissa)){
+      fprintf(stderr, "NaN\n");
         return (sign << 15) + 0x7FFF ; //signal NaN
     }
   //deal with INF coming in (all 1's in exponent, all 0's in mantissa, ie 127 after debiasing) as well as overflow (anything > 15)
-    else if(exponent > 15){
+    else if(exponent > 16){
         return (sign << 15) + 0x7C00; // set exponent bits to all ones, mantissa to zero (infinity)
     }
   //denormalization handling
@@ -161,17 +162,24 @@ uint16_t as_ieee_16(union floating f){
             exponent += 15;
         } else {
           //denormalized!!! watch out, this is still unbiased. i.e. -15 to 16 range. 
-            int shift = -(exponent+14);
+          //need to add in implied 1...
+            int shift = -(exponent+15);
             //-14 is smallest reprsentable number. find difference btwn it and the the current exponent to determine bitshift. 
             // for example: 00111 * 2^-17 --> 17-14 = >>3 --> 000001 2^-14 
-            mantissa = mantissa >>(shift); // shift mantissa to account for the exponent being STRICTLY -14. 
-            exponent = 0;//exponent is 0 for denorm numbers. 
+            if ((shift != 0) && !(mantissa)){
+              mantissa = mantissa | 0x400000; //makes msb 1, so that the mantissa isn't just 0 once we shift. . 
+            }
+              mantissa = mantissa >>(shift); // shift mantissa to account for the exponent being STRICTLY -14. 
+              exponent = 0;//exponent is 0 for denorm numbers. 
         }
         u_int8_t round_bit = (f.as_int>>12)&1;
         mantissa >>= 13; // bitshift mantissa to 10b form. 
         // round
-        if (round_bit && (mantissa & 1)) {//check if mantissa's last value is 1 and if the rounding bit is one. 
+       if(round_bit && ((mantissa & 1) || (mantissa & 0x7FF))){//check if mantissa's last value is 1 and if the rounding bit is one. 
+       //also checks if the bits after the round bit if the round bit is on 
+        fprintf(stderr, "%0x rounded up\n", mantissa);
             mantissa += 1; //if so, round
+          fprintf(stderr, "%0x after round\n", mantissa);
             if (mantissa & 0x400) { // overflow check
                 mantissa = 0; //overflow means the number was gonna be all 0 anyways (like 111+1) so just reset to fit it. 
                 exponent += 1; // increment exponent
@@ -183,7 +191,7 @@ uint16_t as_ieee_16(union floating f){
 
         // Combine sign, exponent, and mantissa into the final 16-bit half-precision float
         return (sign << 15) | (exponent << 10) | (mantissa & 0x3FF);
-    }
+}
 }
 
 
