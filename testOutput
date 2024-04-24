@@ -1,54 +1,20 @@
-Input: "0x33800000"
-Float: 864026624.000000
-Hex: 0x4e4e0000
-Info: +1.10011100000000000000000 2^29
-Half Hex: 0x7c00
--------------------ieee_16_info call--------------
-sign is +
-Half info: +INF
-
-Input: "0x33bfffff"
-Float: 868220928.000000
-Hex: 0x4e4f0000
-Info: +1.10011110000000000000000 2^29
-Half Hex: 0x7c00
--------------------ieee_16_info call--------------
-sign is +
-Half info: +INF
-
 Input: "0x33c00000"
-Float: 868220928.000000
-Hex: 0x4e4f0000
-Info: +1.10011110000000000000000 2^29
-Half Hex: 0x7c00
+input is an hex value
+Float: 0.000000
+Hex: 0x33c00000
+Info: +1.10000000000000000000000 2^-24
+Half Hex: 0x0002
 -------------------ieee_16_info call--------------
 sign is +
-Half info: +INF
+Half info: +0.0000000010 2^-15
 
 Input: "0x387fe000"
-Float: 947904512.000000
-Hex: 0x4e61ff80
-Info: +1.11000011111111110000000 2^29
-Half Hex: 0x7c00
+input is an hex value
+Float: 0.000000
+Hex: 0x33c00000
+Info: +1.10000000000000000000000 2^-24
+Half Hex: 0x0002
 -------------------ieee_16_info call--------------
 sign is +
-Half info: +INF
-
-Input: "0x387ff000"
-Float: 947908608.000000
-Hex: 0x4e61ffc0
-Info: +1.11000011111111111000000 2^29
-Half Hex: 0x7c00
--------------------ieee_16_info call--------------
-sign is +
-Half info: +INF
-
-Input: "0x477fd001"
-Float: 1199558656.000000
-Hex: 0x4e8effa0
-Info: +1.00011101111111110100000 2^30
-Half Hex: 0x7c00
--------------------ieee_16_info call--------------
-sign is +
-Half info: +INF
+Half info: +0.0000000010 2^-15
 
