@@ -173,9 +173,9 @@ uint16_t as_ieee_16(union floating f){
         u_int8_t round_bit = (mantissa>>12)&1;
         fprintf(stderr,"round bit is: %d \n", round_bit);
 
-        // rouna
-       if(round_bit && (((mantissa>>13) & 1) || (f.as_int & 0xFFF)>0)){//check if mantissa's last value is 1 and if the rounding bit is one. 
-       //also checks if the bits after the round bit if the round bit is on 
+        // roun
+       if(round_bit && (((mantissa>>13) & 1) || (f.as_int & 0xFFF))){//check if mantissa's last value is 1 and if the rounding bit is one. 
+       //also checks if the bits after the round bit if the round bit is one
         mantissa >>= 13; // bitshift mantissa to 10b form. 
         fprintf(stderr, "%0x rounded up\n", mantissa);
             mantissa += 1; //if so, round
@@ -188,7 +188,8 @@ uint16_t as_ieee_16(union floating f){
                     return (sign << 15) | 0x7C00; // return infinity
                 }
             }
-        }
+       }
+       else{mantissa >>= 13;}
 
     // Combine sign, exponent, and mantissa into the final 16-bit half-precision float
     return (sign << 15) | (exponent << 10) | (mantissa & 0x3FF);
